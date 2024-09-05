@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 40%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .actions button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <form id="todo-form">
+            <input type="text" id="task-name" placeholder="Enter task" required>
+            <input type="text" id="task-details" placeholder="Enter details" required>
+            <button type="submit">Add Task</button>
+        </form>
+        
+        <table id="tasks-table">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tasks-list">
+
+            </tbody>
+        </table>
+    </div>
+    <script>
+        const form = document.getElementById('todo-form');
+        const taskNameInput = document.getElementById('task-name');
+        const taskDetailsInput = document.getElementById('task-details');
+        const tasksList = document.getElementById('tasks-list');
+
+        document.addEventListener('DOMContentLoaded', displayTasks);
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            addTask(taskNameInput.value, taskDetailsInput.value);
+            taskNameInput.value = '';
+            taskDetailsInput.value = '';
+        });
+
+        function addTask(task, details) {
+            const tasks = getTasks();
+            const newTask = [task, details];
+            tasks.push(newTask);
+            saveTasks(tasks);
+            displayTasks();
+        }
+
+        function displayTasks() {
+            const tasks = getTasks();
+            tasksList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${task[0]}</td>
+                    <td>${task[1]}</td>
+                    <td class="actions">
+                        <button onclick="editTask(${index})">Edit</button>
+                        <button onclick="deleteTask(${index})">Delete</button>
+                    </td>
+                `;
+                tasksList.appendChild(tr);
+            });
+        }
+
+        function editTask(index) {
+            const tasks = getTasks();
+            const task = tasks[index];
+            taskNameInput.value = task[0];
+            taskDetailsInput.value = task[1];
+            deleteTask(index);
+        }
+
+        function deleteTask(index) {
+            const tasks = getTasks();
+            tasks.splice(index, 1);
+            saveTasks(tasks);
+            displayTasks();
+        }
+
+        function getTasks() {
+            const storedTasks = localStorage.getItem('tasks');
+            return storedTasks ? storedTasks.split('||').map(task => task.split('|')) : [];
+        }
+
+        function saveTasks(tasks) {
+            localStorage.setItem('tasks', tasks.map(task => task.join('|')).join('||'));
+        }
+    </script>
+</body>
+</html>
